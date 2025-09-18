@@ -26,7 +26,11 @@ function App() {
   }
 
   if (wallet_expenses){
-    setexpenses(Number(wallet_expenses))
+   // setexpenses(Number(wallet_expenses))
+    const parsed = JSON.parse(wallet_expenses);
+    setTransaction(parsed);
+    setexpenses(parsed.reduce((sum, t) => sum + Number(t.price), 0)); 
+
   }
 
   const wallet_transactions = localStorage.getItem("transactions");
@@ -40,7 +44,7 @@ function App() {
   //ADD TO LOCAL STORAGE
   useEffect(() => {
     localStorage.setItem("walletbalance", Number(walletbalance))
-    localStorage.setItem("expenses", Number(expenses))
+    localStorage.setItem("expenses", JSON.stringify(transactions))
       localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [walletbalance, expenses, transactions])
 
