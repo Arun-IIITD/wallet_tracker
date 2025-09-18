@@ -5,7 +5,7 @@ function App() {
   const categories = ["Food", "Entertainment", "Travel"];
   const [walletbalance, setwalletbalance] = useState(5000);
   const [expenses, setexpenses] = useState(0);
-  const [transactions, setTransaction] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [showIncomeModal, setshowincomemodal] = useState(false);
   const [showexpensemodal, setshowexpensemodal] = useState(false);
   const [incomeAmount, setIncomeAmount] = useState("");
@@ -26,16 +26,20 @@ function App() {
   }
 
   if (wallet_expenses){
-   // setexpenses(Number(wallet_expenses))
-    const parsed = JSON.parse(wallet_expenses);
-    setTransaction(parsed);
-    setexpenses(parsed.reduce((sum, t) => sum + Number(t.price), 0)); 
-
+    setexpenses(Number(wallet_expenses))
   }
 
   const wallet_transactions = localStorage.getItem("transactions");
   if (wallet_transactions){
-    setTransaction(JSON.parse(wallet_transactions))
+    try {
+      const parsed = JSON.parse(wallet_transactions);
+    //setTransactions(JSON.parse(wallet_transactions))
+     setTransactions(Array.isArray(parsed) ? parsed : []);
+  } catch(err) {
+    console.error("Failed to parse transactions from localStorage", err);
+    setTransactions([]);
+  }
+    
   }
    }, []);
 
@@ -43,8 +47,8 @@ function App() {
 
   //ADD TO LOCAL STORAGE
   useEffect(() => {
-    localStorage.setItem("walletbalance", Number(walletbalance))
-    localStorage.setItem("expenses", JSON.stringify(transactions))
+        localStorage.setItem("walletbalance", Number(walletbalance))
+    localStorage.setItem("expenses", Number(expenses))
       localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [walletbalance, expenses, transactions])
 
@@ -53,17 +57,13 @@ function App() {
     e.preventDefault();
     if(!incomeAmount) return;
 
-    // setwalletbalance(Number(walletbalance) + Number(incomeAmount));
-    // setIncomeAmount("");
-    // const newWallet = walletbalance + Number(incomeAmount);
-    // localStorage.setItem("walletbalance", Number(newWallet));
-    // setshowincomemodal(false);
 
     const updatedWallet = Number(walletbalance) + Number(incomeAmount);
     setwalletbalance(updatedWallet);
     setIncomeAmount("");
-    localStorage.setItem("walletbalance", updatedWallet);
     setshowincomemodal(false);
+    localStorage.setItem("walletbalance", updatedWallet);
+
 
 }
 
@@ -76,7 +76,7 @@ const handleaddexpense = (e) => {
     return ;
   }
 
-  const newexpense = {
+  const newExpense = {
    id: Date.now(),
    title,
    price: Number(price),
@@ -84,23 +84,19 @@ const handleaddexpense = (e) => {
    date,
   };
 
-  // setTransaction([...transactions,newexpense]);
-  // setexpenses(expenses +Number(price))
-  // setwalletbalance(walletbalance - Number(price))
-  // //setexpenseform("");
-  // setexpenseform({ title: "", price: "", category: "Food", date: "" });
-  // setshowexpensemodal(false)
-   const updatedTransactions = [...transactions, newexpense];
-    setTransaction(updatedTransactions);
+    const updatedTransactions = [newExpense, ...transactions];
+    setTransactions(updatedTransactions);
+    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
 
     const newExpensesTotal = expenses + Number(price);
     setexpenses(newExpensesTotal);
+    localStorage.setItem("expenses", newExpensesTotal);
     const newWallet = walletbalance - Number(price);
     setwalletbalance(newWallet);
+    localStorage.setItem("walletbalance", newWallet);
     setexpenseform({ title: "", price: "", category: "Food", date: "" });
     setshowexpensemodal(false);
-    // localStorage.setItem("expenses", JSON.stringify(updatedTransactions));
-    // localStorage.setItem("walletbalance", Number(newWallet));
+ 
 
 
 
@@ -200,7 +196,7 @@ const handleaddexpense = (e) => {
 
         
         <button type="submit">Add Expense</button>
-        <button onClick={() => setshowexpensemodal(false)}>Cancel</button>
+        <button type="button" onClick={() => setshowexpensemodal(false)}>Cancel</button>
 
 
         </form>
