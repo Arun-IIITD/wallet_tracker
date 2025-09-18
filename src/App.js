@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
+import "./App.css"
 
 function App() {
   const categories = ["Food", "Entertainment", "Travel"];
   const [walletbalance, setwalletbalance] = useState(5000);
   const [expenses, setexpenses] = useState(0);
-  const [transactions, setTransaction] = useState("");
-  const [showIncomeModal, setshowincomemodal] = useState("");
-  const [showexpensemodal, setshowexpensemodal] = useState("");
+  const [transactions, setTransaction] = useState([]);
+  const [showIncomeModal, setshowincomemodal] = useState(false);
+  const [showexpensemodal, setshowexpensemodal] = useState(false);
   const [incomeAmount, setIncomeAmount] = useState("");
   const [expenseform, setexpenseform] = useState({
     title: "",
     price: "",
-    category: "food",
+    category: "Food",
     date: "",
   });
 
@@ -30,7 +31,7 @@ function App() {
 
   const wallet_transactions = localStorage.getItem("transactions");
   if (wallet_transactions){
-    setTransaction(wallet_transactions)
+    setTransaction(JSON.parse(wallet_transactions))
   }
    }, []);
 
@@ -40,7 +41,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem("walletbalance", Number(walletbalance))
     localStorage.setItem("expense", Number(expenses))
-      localStorage.setItem("transactions", transactions);
+      localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [walletbalance, expenses, transactions])
 
   //ADD BALANCE OR INCOME
@@ -73,7 +74,8 @@ const handleaddexpense = (e) => {
   setTransaction([...transactions,newexpense]);
   setexpenses(expenses +Number(price))
   setwalletbalance(walletbalance - Number(price))
-  setexpenseform("");
+  //setexpenseform("");
+  setexpenseform({ title: "", price: "", category: "Food", date: "" });
   setshowexpensemodal(false)
 
 
@@ -99,13 +101,13 @@ const handleaddexpense = (e) => {
       <div className="cards">
           <div className="card">
             <h2>Wallet Balance:  <span style={{ color: "limegreen" }}>₹{walletbalance}</span> </h2>
-            <button onClick={()=> setshowincomemodal(true)} style = {{backgroundColor: "limegreen"}}> + Add Balance</button>
+            <button onClick={()=> setshowincomemodal(true)} style = {{backgroundColor: "limegreen"}}> + Add Income</button>
           </div>
 
 
           <div className="card">
             <h2>Expenses: <span style={{ color: "orange" }}>₹{expenses}</span> </h2>
-            <button onClick={() => setshowexpensemodal(true)} style = {{backgroundColor: "orange"}}> + Add Expenses</button>
+            <button onClick={() => setshowexpensemodal(true)} style = {{backgroundColor: "orange"}}> + Add Expense</button>
           </div>
 
       </div>
@@ -183,6 +185,20 @@ const handleaddexpense = (e) => {
 
        {/* RECENT TRANSACTIONS*/}
        <div className="transactions">
+        <h2>Transactions</h2>
+        {transactions.length === 0 ? (
+          <p>No transactions yet</p>
+        ):(
+          <ul>
+            {transactions.map((t) => (
+              <li key ={t.id}>
+                <strong>{t.title}</strong> -  ₹{t.price} ({t.category}) on {t.date}
+                
+              </li>
+            ))}
+          </ul>
+        )}
+
 
        </div>
 
