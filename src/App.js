@@ -4,7 +4,7 @@ import "./App.css"
 function App() {
   const categories = ["Food", "Entertainment", "Travel"];
   const [walletbalance, setwalletbalance] = useState(5000);
-  const [expenses, setexpenses] = useState(0);
+  const [expenses, setexpenses] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [showIncomeModal, setshowincomemodal] = useState(false);
   const [showexpensemodal, setshowexpensemodal] = useState(false);
@@ -26,7 +26,12 @@ function App() {
   }
 
   if (wallet_expenses){
-    setexpenses(Number(wallet_expenses))
+    try {
+        const parsedExpenses = JSON.parse(wallet_expenses);
+        setexpenses(Array.isArray(parsedExpenses) ? parsedExpenses : []);
+      } catch {
+        setexpenses([]);
+      }
   }
 
   const wallet_transactions = localStorage.getItem("transactions");
@@ -48,7 +53,7 @@ function App() {
   //ADD TO LOCAL STORAGE
   useEffect(() => {
         localStorage.setItem("walletbalance", Number(walletbalance))
-    localStorage.setItem("expenses", Number(expenses))
+    localStorage.setItem("expenses", JSON.stringify(expenses))
       localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [walletbalance, expenses, transactions])
 
@@ -84,13 +89,12 @@ const handleaddexpense = (e) => {
    date,
   };
 
-    const updatedTransactions = [newExpense, ...transactions];
-    setTransactions(updatedTransactions);
-    localStorage.setItem("transactions", JSON.stringify(updatedTransactions));
+    const updatedExpenses = [newExpense, ...expenses];
+   // setTransactions(updatedTransactions);
+     setexpenses(updatedExpenses);
+    localStorage.setItem("expenses", JSON.stringify(updatedExpenses));
 
-    const newExpensesTotal = expenses + Number(price);
-    setexpenses(newExpensesTotal);
-    localStorage.setItem("expenses", newExpensesTotal);
+    
     const newWallet = walletbalance - Number(price);
     setwalletbalance(newWallet);
     localStorage.setItem("walletbalance", newWallet);
@@ -105,6 +109,8 @@ const handleaddexpense = (e) => {
 
 
 }
+const totalExpenses = expenses.reduce((sum, e) => sum + e.price, 0);
+
 
 
 
@@ -126,7 +132,7 @@ const handleaddexpense = (e) => {
 
 
           <div className="card">
-            <h2>Expenses: <span style={{ color: "orange" }}>₹{expenses}</span> </h2>
+            <h2>Expenses: <span style={{ color: "orange" }}>₹{totalExpenses}</span> </h2>
             <button onClick={() => setshowexpensemodal(true)} style = {{backgroundColor: "orange"}}> + Add Expense</button>
           </div>
 
@@ -160,7 +166,7 @@ const handleaddexpense = (e) => {
           {/* FOR TITLE */}
           <input
           name="title"
-          placeholder="TITLE"
+          placeholder="title"
           value={expenseform.title}
           onChange={(e) => setexpenseform({...expenseform,title: e.target.value})}
           />
@@ -196,7 +202,7 @@ const handleaddexpense = (e) => {
 
         
         <button type="submit">Add Expense</button>
-        <button type="button" onClick={() => setshowexpensemodal(false)}>Cancel</button>
+        <button type="submit" onClick={() => setshowexpensemodal(false)}>Cancel</button>
 
 
         </form>
@@ -206,11 +212,11 @@ const handleaddexpense = (e) => {
        {/* RECENT TRANSACTIONS*/}
        <div className="transactions">
         <h2>Transactions</h2>
-        {transactions.length === 0 ? (
+        {expenses.length === 0 ? (
           <p>No transactions yet</p>
         ):(
           <ul>
-            {transactions.map((t) => (
+            {expenses.map((t) => (
               <li key ={t.id}>
                 <strong>{t.title}</strong> -  ₹{t.price} ({t.category}) on {t.date}
                 
