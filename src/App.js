@@ -40,7 +40,7 @@ function App() {
   //ADD TO LOCAL STORAGE
   useEffect(() => {
     localStorage.setItem("walletbalance", Number(walletbalance))
-    localStorage.setItem("expense", Number(expenses))
+    localStorage.setItem("expenses", Number(expenses))
       localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [walletbalance, expenses, transactions])
 
@@ -49,9 +49,18 @@ function App() {
     e.preventDefault();
     if(!incomeAmount) return;
 
-    setwalletbalance(Number(walletbalance) + Number(incomeAmount));
+    // setwalletbalance(Number(walletbalance) + Number(incomeAmount));
+    // setIncomeAmount("");
+    // const newWallet = walletbalance + Number(incomeAmount);
+    // localStorage.setItem("walletbalance", Number(newWallet));
+    // setshowincomemodal(false);
+
+    const updatedWallet = Number(walletbalance) + Number(incomeAmount);
+    setwalletbalance(updatedWallet);
     setIncomeAmount("");
+    localStorage.setItem("walletbalance", updatedWallet);
     setshowincomemodal(false);
+
 }
 
 //ADD EXPENSES
@@ -71,12 +80,23 @@ const handleaddexpense = (e) => {
    date,
   };
 
-  setTransaction([...transactions,newexpense]);
-  setexpenses(expenses +Number(price))
-  setwalletbalance(walletbalance - Number(price))
-  //setexpenseform("");
-  setexpenseform({ title: "", price: "", category: "Food", date: "" });
-  setshowexpensemodal(false)
+  // setTransaction([...transactions,newexpense]);
+  // setexpenses(expenses +Number(price))
+  // setwalletbalance(walletbalance - Number(price))
+  // //setexpenseform("");
+  // setexpenseform({ title: "", price: "", category: "Food", date: "" });
+  // setshowexpensemodal(false)
+   const updatedTransactions = [...transactions, newexpense];
+    setTransaction(updatedTransactions);
+
+    const newExpensesTotal = expenses + Number(price);
+    setexpenses(newExpensesTotal);
+    const newWallet = walletbalance - Number(price);
+    setwalletbalance(newWallet);
+    setexpenseform({ title: "", price: "", category: "Food", date: "" });
+    setshowexpensemodal(false);
+    // localStorage.setItem("expenses", JSON.stringify(updatedTransactions));
+    // localStorage.setItem("walletbalance", Number(newWallet));
 
 
 
